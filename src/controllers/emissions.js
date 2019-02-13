@@ -10,4 +10,14 @@ emissionRouter.get('/', async (req, res) => {
     res.json(emissions)
 })
 
+emissionRouter.get('/:countryCode', async (req, res) => {
+    const countryCode = req.params.countryCode
+
+    const emissions = await models.Emission.findAll({
+        where: {countryCode}
+    })
+
+    res.json(emissions)
+})
+
 export default emissionRouter
