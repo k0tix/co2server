@@ -6,7 +6,10 @@ export const sequelize = new Sequelize(
   process.env.DATABASE_PWD,
   {
     dialect: 'postgres',
-  },
+    dialectOptions: {
+      bigNumberStrings: true
+    }
+  }
 )
 
 const models = {
