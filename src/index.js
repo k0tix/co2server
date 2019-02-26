@@ -11,8 +11,8 @@ import EmissionRouter from './controllers/emissions'
 import PopulationRouter from './controllers/populations'
 import CountryRouter from './controllers/countries'
 
-import getValues from './utils/parseFromCsv'
-import {fetch, unzip} from './utils/fileFetcher'
+import { getPopulationsAndCountries, getEmissions } from './utils/parseFromCsv'
+import { fetch, unzip } from './utils/fileFetcher'
 
 const app = express()
 
@@ -39,9 +39,9 @@ sequelize.sync({ force: true })
       .then(() => {
         unzip()
       })*/
-    getValues()
-    
-      console.log(new Date() > fs.statSync(path).mtime)
+
+      getPopulationsAndCountries()
+      getEmissions()
   })
   .catch(error => {
     console.error('Error: ' + error)
@@ -50,3 +50,6 @@ sequelize.sync({ force: true })
 server.listen(process.env.PORT, () => {
   console.log(`server listening on port ${process.env.PORT}`)
 })
+
+//http://api.worldbank.org/v2/en/indicator/SP.POP.TOTL?downloadformat=csv
+//http://api.worldbank.org/v2/en/indicator/EN.ATM.CO2E.KT?downloadformat=csv

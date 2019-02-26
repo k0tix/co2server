@@ -1,15 +1,18 @@
 import fs from 'fs'
-import csv from 'fast-csv'
+import csv, { format } from 'fast-csv'
+import nodeSchedule from 'node-schedule'
 
-import models from '../models'
+import models, { sequelize } from '../models/index'
 
-var stream = fs.createReadStream('./src/utils/API_SP.POP.TOTL_DS2_en_csv_v2_10473719.csv')
+var populationStream = fs.createReadStream('./src/utils/data/API_SP.POP.TOTL_DS2_en_csv_v2_10473719.csv')
+
+var emissionStream = fs.createReadStream('./src/utils/data/API_EN.ATM.CO2E.KT_DS2_en_csv_v2_10473877.csv')
 
 var countries = []
 var populations = []
 var emissions = []
 
-var csvStream = csv()
+var populationCountryCsvStream = csv()
     .on('data', async (data) => {
         setCountry(countries, data)
         setValues(populations, data)
@@ -19,9 +22,22 @@ var csvStream = csv()
             await models.Country.bulkCreate(countries)
             await models.Population.bulkCreate(populations)
         } catch (error) {
-            console.log('ERROR: ' + error)
+            console.error('Population and country csv parsing failed: ' + error)
         }
-        console.log('Values set')
+        console.log('Population and country values set')
+    })
+
+var emissionCsvStream = csv()
+    .on('data', async (data) => {
+        setValues(emissions, data)
+    })
+    .on('end', async () => {
+        try {
+            await models.Emission.bulkCreate(emissions)
+        } catch (error) {
+            console.error('Emission csv parsing failed: ' + error)
+        }
+        console.log('Emission values set')
     })
 
 const setCountry = (countries, data) => {
@@ -47,8 +63,25 @@ const setValues = (valueArray, data) => {
     }
 }
 
-const getValues = () => {
-    stream.pipe(csvStream)
+const setEmission = (values, data) => {
+    var startingYear = 1960
+
+    var populationValues = populations.filter(p => p.countryCode === data[1])
+
+    console.log('VALUE:' + populationValues)
+
+    const value = isNaN(parseInt(data[i])) ? null : parseInt(data[i])
+    const perCapitaValue = (isNan(parseInt(data[i])) || populations.filter())
+
+    for(var i = 4; i < data.length; i++) {
+
+    }
 }
 
-export default getValues
+export const getPopulationsAndCountries = () => {
+    return populationStream.pipe(populationCountryCsvStream)
+}
+
+export const getEmissions = () => {
+    emissionStream.pipe(emissionCsvStream)
+}
