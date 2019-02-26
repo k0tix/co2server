@@ -5,6 +5,15 @@ const emission = (sequelize, DataTypes) => {
         type: DataTypes.BIGINT,
         allowNull: true
       },
+      /*
+      * perCapitaValue is calculated when the database is
+      * updated so it doesn't have to be calculated
+      * on client side
+      */
+      perCapitaValue: {
+        type: DataTypes.DECIMAL,
+        allowNull: true
+      },
       year: DataTypes.STRING,
     },
     {
