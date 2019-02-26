@@ -19,4 +19,4 @@ const population = (sequelize, DataTypes) => {
     return Population
 }
 
-export default population
+module.exports = population

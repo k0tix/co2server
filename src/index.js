@@ -1,18 +1,17 @@
-import 'dotenv/config'
-import cors from 'cors'
-import http from 'http'
-import bodyParser from 'body-parser'
-import express from 'express'
-import fs from 'fs'
+require('dotenv').config()
+const cors = require('cors')
+const http = require('http')
+const bodyParser = require('body-parser')
+const express = require('express')
 
-import { sequelize } from './models'
+const sequelize = require('./models/').sequelize
 
-import EmissionRouter from './controllers/emissions'
-import PopulationRouter from './controllers/populations'
-import CountryRouter from './controllers/countries'
+const EmissionRouter = require('./controllers/emissions')
+const PopulationRouter = require('./controllers/populations')
+const CountryRouter = require('./controllers/countries')
 
-import { getPopulationsAndCountries, getEmissions } from './utils/parseFromCsv'
-import { fetch, unzip } from './utils/fileFetcher'
+const getPopulationsAndCountries = require('./utils/parseFromCsv').getPopulationsAndCountries
+const getEmissions = require('./utils/parseFromCsv').getEmissions
 
 const app = express()
 

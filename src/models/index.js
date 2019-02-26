@@ -1,6 +1,6 @@
-import Sequelize from 'sequelize'
+const Sequelize = require('sequelize')
 
-export const sequelize = new Sequelize(process.env.DATABAS_URL, {
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
     dialesctOptions: {
       bigNumberStrings: true
@@ -19,4 +19,4 @@ Object.keys(models).forEach(key => {
   }
 })
 
-export default models
+module.exports = {sequelize, models}

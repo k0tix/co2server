@@ -1,8 +1,6 @@
-import { Router } from 'express'
+const countryRouter = require('express').Router()
 
-import models from '../models'
-
-const countryRouter = Router()
+const models = require('../models/').models
 
 countryRouter.get('/', async (req, res) => {
     const countries = await models.Country.findAll()
@@ -21,4 +19,4 @@ countryRouter.get('/:countryCode', async (req, res) => {
     res.json(country)
 })
 
-export default countryRouter
+module.exports = countryRouter

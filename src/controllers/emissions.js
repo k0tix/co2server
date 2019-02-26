@@ -1,11 +1,9 @@
-import { Router } from 'express'
+const emissionRouter = require('express').Router()
 
-import models from '../models'
-
-const emissionRouter = Router()
+const Emission = require('../models/').models.Emission
 
 emissionRouter.get('/', async (req, res) => {
-    const emissions = await models.Emission.findAll()
+    const emissions = await Emission.findAll()
 
     res.json(emissions)
 })
@@ -13,11 +11,11 @@ emissionRouter.get('/', async (req, res) => {
 emissionRouter.get('/:countryCode', async (req, res) => {
     const countryCode = req.params.countryCode
 
-    const emissions = await models.Emission.findAll({
+    const emissions = await Emission.findAll({
         where: {countryCode}
     })
 
     res.json(emissions)
 })
 
-export default emissionRouter
+module.exports = emissionRouter

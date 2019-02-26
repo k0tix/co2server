@@ -18,4 +18,4 @@ const country = (sequelize, DataTypes) => {
   return Country
 }
 
-export default country
+module.exports = country

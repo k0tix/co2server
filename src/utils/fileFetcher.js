@@ -1,8 +1,8 @@
-import http from 'http'
-import fs from 'fs'
-import yauzl from 'yauzl'
+const http = require('http')
+const fs = require('fs')
+const yauzl = require('yauzl')
 
-export const fetch = (url, destination, callback) => {
+const fetch = (url, destination, callback) => {
     return new Promise((resolve, reject) => {
         const file = fs.createWriteStream(destination)
 
@@ -28,7 +28,7 @@ export const fetch = (url, destination, callback) => {
     })
 }
 
-export const unzip = (path) => {
+const unzip = (path) => {
     yauzl.open(path, (error, zipfile) => { //path can be "./src/utils/data.zip"
         if (error) throw error
         zipfile.on("entry", (entry) => {
@@ -47,7 +47,9 @@ export const unzip = (path) => {
     })
 }
 
-export const fetchAndUnzip = async (url ,destination, callback) => {
+const fetchAndUnzip = async (url ,destination, callback) => {
     await fetch(url, destination, callback)
     unzip(destination)
 }
+
+module.exports = fetch, unzip, fetchAndUnzip

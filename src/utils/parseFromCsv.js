@@ -1,8 +1,8 @@
-import fs from 'fs'
-import csv, { format } from 'fast-csv'
-import nodeSchedule from 'node-schedule'
+const fs = require('fs')
+const csv = require('fast-csv')
+const nodeSchedule = require('node-schedule')
 
-import models, { sequelize } from '../models/index'
+const models = require('../models').models
 
 var populationStream = fs.createReadStream('./src/utils/data/API_SP.POP.TOTL_DS2_en_csv_v2_10473719.csv')
 
@@ -78,10 +78,14 @@ const setEmission = (values, data) => {
     }
 }
 
-export const getPopulationsAndCountries = () => {
+const getPopulationsAndCountries = () => {
     return populationStream.pipe(populationCountryCsvStream)
 }
 
-export const getEmissions = () => {
+const getEmissions = () => {
     emissionStream.pipe(emissionCsvStream)
+}
+
+module.exports = {
+    getPopulationsAndCountries, getEmissions
 }

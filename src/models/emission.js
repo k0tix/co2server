@@ -28,4 +28,4 @@ const emission = (sequelize, DataTypes) => {
   return Emission
 }
 
-export default emission
+module.exports = emission
