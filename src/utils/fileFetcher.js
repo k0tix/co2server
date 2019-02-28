@@ -63,21 +63,18 @@ const processZip = (path) => {
                             if(entry.fileName.includes('SP.POP.TOTL')) {
                                 //getPopulationsAndCountries(filePath)
                                 console.log('population data processed')
-                                resolve('file parsed')
+                                //resolve(filePath)
                             } else {
-                                //getEmissions(filePath)
+                                //etEmissions(filePath)
                                 console.log('emission data processed')
-                                resolve('file parsed')
+                                //resolve(filePath)
                             }
+                            zipfile.close()
+                            resolve(filePath)
                         })                    
                     })
                 }
                 
-            })
-
-            zipfile.once('end', (entry) => {
-                zipfile.close()
-                resolve('file parsed')
             })
         })
     })
@@ -86,7 +83,8 @@ const processZip = (path) => {
 const fetchAndProcessZip = async (url ,destination, name, callback) => {
     const fileDestination = destination + '/' + name.concat('.zip')
     await fetch(url, fileDestination, callback)
-    await processZip(fileDestination)
+    const filePath = await processZip(fileDestination)
+    return filePath
 }
 
 module.exports = {

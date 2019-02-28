@@ -14,7 +14,8 @@ const emission = (sequelize, DataTypes) => {
         type: DataTypes.DECIMAL,
         allowNull: true
       },
-      year: DataTypes.STRING,
+      
+      year: DataTypes.STRING
     },
     {
       timestamps: false

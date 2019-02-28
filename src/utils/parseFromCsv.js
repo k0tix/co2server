@@ -24,7 +24,7 @@ var populationCountryCsvStream = csv()
 
 var emissionCsvStream = csv()
     .on('data', async (data) => {
-        setValues(emissions, data)
+        setEmissions(emissions, data)
     })
     .on('end', async () => {
         try {
@@ -58,30 +58,53 @@ const setValues = (valueArray, data) => {
     }
 }
 
-const setEmission = (values, data) => {
+const setEmissions = (valueArray, data) => {
     var startingYear = 1960
 
     var populationValues = populations.filter(p => p.countryCode === data[1])
 
-    console.log('VALUE:' + populationValues)
-
-    const value = isNaN(parseInt(data[i])) ? null : parseInt(data[i])
-    const perCapitaValue = (isNan(parseInt(data[i])) || populations.filter())
-
+    var populationsIndex = 0
     for(var i = 4; i < data.length; i++) {
+        const value = isNaN(parseInt(data[i])) ? null : parseInt(data[i])
+        const populationValue = populationValues[populationsIndex].value
+        valueArray.push({
+            value: value,
+            perCapitaValue: (value === null || populationValue === null) ? null : 1000*(value / populationValue), //convert to metric tons
+            year: startingYear.toString(),
+            countryCode: data[1]
+        })
 
+        populationsIndex++
+        startingYear++
     }
 }
 
 const getPopulationsAndCountries = (filePath) => {
-    populations = []
-    countries = []
-    return populationCountryCsvStream.pipe(fs.createReadStream(filePath))
+    return new Promise((resolve, reject) => {
+        var stream = fs.createReadStream(filePath).pipe(populationCountryCsvStream)
+        stream.on('finish', () => {
+            setTimeout(() => {
+                resolve()
+            }, 1000)
+        })
+        stream.on('error', () => {
+            reject('error')
+        })
+    })
 }
 
 const getEmissions = (filePath) => {
-    emissions = []
-    return emissionCsvStream.pipe(fs.createReadStream(filePath))
+    return new Promise((resolve, reject) => {
+        var stream = fs.createReadStream(filePath).pipe(emissionCsvStream)
+        stream.on('finish', () => {
+            setTimeout(() => {
+                resolve()
+            }, 1000)
+        })
+        stream.on('error', () => {
+            reject('error')
+        })
+    })
 }
 
 module.exports = {
