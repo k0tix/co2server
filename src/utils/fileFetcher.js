@@ -2,19 +2,21 @@ const http = require('http')
 const fs = require('fs')
 const yauzl = require('yauzl')
 
+const getPopulationsAndCountries = require('./parseFromCsv').getPopulationsAndCountries
+const getEmissions = require('./parseFromCsv').getEmissions
+
 const fetch = (url, destination, callback) => {
     return new Promise((resolve, reject) => {
         const file = fs.createWriteStream(destination)
-
         const request = http.get(url, (response) => {
             response.pipe(file)
-
             file.on('finish', () => {
-                file.close(callback)
                 resolve("File fetched succesfully")
+                file.close(callback)
             })
+        })
 
-        }).on('error', (error) => {
+        request.on('error', (error) => {
             fs.unlink(destination)
             if (callback) {
                 callback(error.message)
@@ -28,28 +30,65 @@ const fetch = (url, destination, callback) => {
     })
 }
 
-const unzip = (path) => {
-    yauzl.open(path, (error, zipfile) => { //path can be "./src/utils/data.zip"
-        if (error) throw error
-        zipfile.on("entry", (entry) => {
-            if (/\/$/.test(entry.fileName)) {
-                // directory file names end with '/'
-                return
-            } else if(entry.fileName.includes('Metadata')) {
-                return
+const processZip = (path) => {
+    return new Promise((resolve, reject) => {
+        yauzl.open(path, {lazyEntries: true}, (error, zipfile) => { //path can be "./src/utils/data.zip"
+            if (error) {
+                reject('unzip failed')
+                throw error
             }
-            zipfile.openReadStream(entry, (error, readStream) => {
-                if (error) throw error
-                // ensure parent directory exists, and then:
-                readStream.pipe(fs.createWriteStream(`./src/utils/data/${entry.fileName}`))
+            zipfile.readEntry()
+            zipfile.on("entry", (entry) => {
+                if(entry.fileName.includes('Metadata')) {
+                    zipfile.readEntry()
+                } else {
+                    zipfile.openReadStream(entry, (error, readStream) => {
+                        if (error) {
+                            console.log('ei toiminu')
+                            throw error
+                        }
+                        // ensure parent directory exists, and then:
+                        const filePath = `./src/utils/data/${entry.fileName}`
+                        fs.writeFile(filePath, '', () => {})
+                        readStream.pipe(fs.createWriteStream(filePath))
+
+                        readStream.on('end', () => {
+                            //remove unneccessary lines
+                            fs.readFile(filePath, 'utf8', (error, data) => {
+                            if(error) throw error
+                                var linesExceptHeaders = data.split('\r\n').slice(5).join('\r\n')
+                                fs.writeFile(filePath, linesExceptHeaders, () => {})
+                            })
+
+                            if(entry.fileName.includes('SP.POP.TOTL')) {
+                                //getPopulationsAndCountries(filePath)
+                                console.log('population data processed')
+                                resolve('file parsed')
+                            } else {
+                                //getEmissions(filePath)
+                                console.log('emission data processed')
+                                resolve('file parsed')
+                            }
+                        })                    
+                    })
+                }
+                
+            })
+
+            zipfile.once('end', (entry) => {
+                zipfile.close()
+                resolve('file parsed')
             })
         })
     })
 }
 
-const fetchAndUnzip = async (url ,destination, callback) => {
-    await fetch(url, destination, callback)
-    unzip(destination)
+const fetchAndProcessZip = async (url ,destination, name, callback) => {
+    const fileDestination = destination + '/' + name.concat('.zip')
+    await fetch(url, fileDestination, callback)
+    await processZip(fileDestination)
 }
 
-module.exports = fetch, unzip, fetchAndUnzip
+module.exports = {
+    fetch, processZip, fetchAndProcessZip
+}

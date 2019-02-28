@@ -1,12 +1,7 @@
 const fs = require('fs')
 const csv = require('fast-csv')
-const nodeSchedule = require('node-schedule')
 
 const models = require('../models').models
-
-var populationStream = fs.createReadStream('./src/utils/data/API_SP.POP.TOTL_DS2_en_csv_v2_10473719.csv')
-
-var emissionStream = fs.createReadStream('./src/utils/data/API_EN.ATM.CO2E.KT_DS2_en_csv_v2_10473877.csv')
 
 var countries = []
 var populations = []
@@ -78,12 +73,15 @@ const setEmission = (values, data) => {
     }
 }
 
-const getPopulationsAndCountries = () => {
-    return populationStream.pipe(populationCountryCsvStream)
+const getPopulationsAndCountries = (filePath) => {
+    populations = []
+    countries = []
+    return populationCountryCsvStream.pipe(fs.createReadStream(filePath))
 }
 
-const getEmissions = () => {
-    emissionStream.pipe(emissionCsvStream)
+const getEmissions = (filePath) => {
+    emissions = []
+    return emissionCsvStream.pipe(fs.createReadStream(filePath))
 }
 
 module.exports = {
