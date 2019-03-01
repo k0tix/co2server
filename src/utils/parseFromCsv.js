@@ -3,9 +3,9 @@ const csv = require('fast-csv')
 
 const models = require('../models').models
 
-var countries = []
-var populations = []
-var emissions = []
+var countries = new Array()
+var populations = new Array()
+var emissions = new Array()
 
 var populationCountryCsvStream = csv()
     .on('data', async (data) => {
@@ -20,7 +20,7 @@ var populationCountryCsvStream = csv()
             console.error('Population and country csv parsing failed: ' + error)
         }
         console.log('Population and country values set')
-    })
+    }) 
 
 var emissionCsvStream = csv()
     .on('data', async (data) => {
@@ -65,7 +65,7 @@ const setEmissions = (valueArray, data) => {
 
     var populationsIndex = 0
     for(var i = 4; i < data.length; i++) {
-        const value = isNaN(parseInt(data[i])) ? null : parseInt(data[i])
+        const value = isNaN(parseFloat(data[i])) ? null : parseFloat(data[i])
         const populationValue = populationValues[populationsIndex].value
         valueArray.push({
             value: value,
@@ -80,28 +80,34 @@ const setEmissions = (valueArray, data) => {
 }
 
 const getPopulationsAndCountries = (filePath) => {
+    countries = new Array()
+    populations = new Array()
     return new Promise((resolve, reject) => {
         var stream = fs.createReadStream(filePath).pipe(populationCountryCsvStream)
-        stream.on('finish', () => {
+        stream.once('finish', () => {
             setTimeout(() => {
                 resolve()
             }, 1000)
         })
-        stream.on('error', () => {
+        stream.on('error', (error) => {
+            console.log(error)
             reject('error')
         })
     })
 }
 
 const getEmissions = (filePath) => {
+    emissions = new Array()
     return new Promise((resolve, reject) => {
         var stream = fs.createReadStream(filePath).pipe(emissionCsvStream)
-        stream.on('finish', () => {
+        stream.once('finish', () => {
             setTimeout(() => {
                 resolve()
+                
             }, 1000)
         })
-        stream.on('error', () => {
+        stream.on('error', (error) => {
+            console.log(error)
             reject('error')
         })
     })

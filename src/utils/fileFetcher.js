@@ -35,6 +35,7 @@ const processZip = (path) => {
         yauzl.open(path, {lazyEntries: true}, (error, zipfile) => { //path can be "./src/utils/data.zip"
             if (error) {
                 reject('unzip failed')
+                console.log('1')
                 throw error
             }
             zipfile.readEntry()
@@ -44,18 +45,20 @@ const processZip = (path) => {
                 } else {
                     zipfile.openReadStream(entry, (error, readStream) => {
                         if (error) {
-                            console.log('ei toiminu')
+                            reject(error)
                             throw error
                         }
                         // ensure parent directory exists, and then:
                         const filePath = `./src/utils/data/${entry.fileName}`
-                        fs.writeFile(filePath, '', () => {})
                         readStream.pipe(fs.createWriteStream(filePath))
 
                         readStream.on('end', () => {
                             //remove unneccessary lines
                             fs.readFile(filePath, 'utf8', (error, data) => {
-                            if(error) throw error
+                            if(error) {
+                                reject(error)
+                                throw error
+                            }
                                 var linesExceptHeaders = data.split('\r\n').slice(5).join('\r\n')
                                 fs.writeFile(filePath, linesExceptHeaders, () => {})
                             })
@@ -84,6 +87,7 @@ const fetchAndProcessZip = async (url ,destination, name, callback) => {
     const fileDestination = destination + '/' + name.concat('.zip')
     await fetch(url, fileDestination, callback)
     const filePath = await processZip(fileDestination)
+    console.log(filePath)
     return filePath
 }
 
