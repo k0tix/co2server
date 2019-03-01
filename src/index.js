@@ -7,15 +7,12 @@ const scheduler = require('node-schedule')
 
 const sequelize = require('./models/').sequelize
 
-const getEmissions = require('./utils/parseFromCsv').getEmissions
-const getPopulationsAndCountries = require('./utils/parseFromCsv').getPopulationsAndCountries
-
 const EmissionRouter = require('./controllers/emissions')
 const PopulationRouter = require('./controllers/populations')
 const CountryRouter = require('./controllers/countries')
 
-//const getPopulationsAndCountries = require('./utils/parseFromCsv').getPopulationsAndCountries
-//const getEmissions = require('./utils/parseFromCsv').getEmissions
+const getPopulationsAndCountries = require('./utils/parseFromCsv').getPopulationsAndCountries
+const getEmissions = require('./utils/parseFromCsv').getEmissions
 
 const populationLink = 'http://api.worldbank.org/v2/en/indicator/SP.POP.TOTL?downloadformat=csv'
 const emissionLink = 'http://api.worldbank.org/v2/en/indicator/EN.ATM.CO2E.KT?downloadformat=csv'
@@ -39,23 +36,24 @@ app.use('/api/country', CountryRouter)
 
 const server = http.createServer(app)
 
-sequelize.sync({force: true})
+sequelize.sync({force: true}).then(() => {
+  update()
+})
 
 const update = async () => {
-  const populationPath = await fetchAndProcessZip(populationLink, './src/utils/data', 'population')
+  try {
+      const populationPath = await fetchAndProcessZip(populationLink, './src/utils/data', 'population')
+      const emissionPath = await fetchAndProcessZip(emissionLink, './src/utils/data', 'emission')
 
-  const emisisonPath = await fetchAndProcessZip(emissionLink, './src/utils/data', 'emission')
-
-  await getPopulationsAndCountries(populationPath)
-  await getEmissions(emisisonPath)
+      await getPopulationsAndCountries(populationPath)
+      await getEmissions(emissionPath)
+  } catch (error) {
+      console.log(error)
+  }
 }
 
 scheduler.scheduleJob('* 2 * * *', () => {
-  try {
-    update()
-  } catch (error) {
-    console.log(error)
-  }
+  update()
 })
 
 server.listen(process.env.PORT, () => {
