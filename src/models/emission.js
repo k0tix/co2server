@@ -2,7 +2,7 @@ const emission = (sequelize, DataTypes) => {
   const Emission = sequelize.define('emission',
     {
       value: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.DOUBLE,
         allowNull: true
       },
       /*
@@ -14,7 +14,6 @@ const emission = (sequelize, DataTypes) => {
         type: DataTypes.DECIMAL,
         allowNull: true
       },
-      
       year: DataTypes.STRING
     },
     {
